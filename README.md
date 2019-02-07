@@ -1,4 +1,4 @@
-# NN-Dimension-Reduction
+# Image Generation
 AutoEnoder
 
 Working on variational Auto Encoder
