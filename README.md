@@ -8,4 +8,5 @@ AutoEnoder
 
 Variational Auto Encoder- (Working on it)
 1. Using Xavier Initialization.
+2. Brief theory source - http://kvfrans.com/variational-autoencoders-explained/
 ------
