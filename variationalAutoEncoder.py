@@ -55,3 +55,56 @@ decoder = tf.nn.tanh(decoder)
 decoder = tf.matmul(decoder, weights['decoder_out']) + biases['decoder_out']
 decoder = tf.nn.sigmoid(decoder)
 
+# variational autoencoder loss #####
+def va_loss(x_reconstruct, x_true):
+    loss = x_true * tf.log(1e-10 + x_reconstruct) + (1 - x_true) * tf.log(1e-10 + 1 - x_reconstruct)
+    loss = -tf.reduce_sum(loss, 1)
+
+    kl_div_loss = 1 + std - tf.square(mean) - tf.exp(std)
+    kl_div_loss = -0.5 * tf.reduce_sum(kl_div_loss, 1)
+    return tf.reduce_mean(loss + kl_div_loss)
+
+loss_op = va_loss(decoder, input_image)
+optimizer = tf.train.RMSPropOptimizer(learning_rate=learning_rate)
+train_op = optimizer.minimize(loss_op)
+
+# Initialize the variables (i.e. assign their default value)
+init = tf.global_variables_initializer()
+
+### Training####
+with tf.Session() as sess:
+
+    # Run the initializer
+    sess.run(init)
+
+    for i in range(1, num_steps+1):
+        batch_x, _ = mnist.train.next_batch(batch_size)
+        feed_dict = {input_image: batch_x}
+        _, l = sess.run([train_op, loss_op], feed_dict=feed_dict)
+        if i % 1000 == 0 or i == 1:
+            print('Step %i, Loss: %f' % (i, l))
+
+#### Testing ####
+    noise_input = tf.placeholder(tf.float32, shape=[None, latent_dim])
+    decoder = tf.matmul(noise_input, weights['decoder_h1']) + biases['decoder_b1']
+    decoder = tf.nn.tanh(decoder)
+    decoder = tf.matmul(decoder, weights['decoder_out']) + biases['decoder_out']
+    decoder = tf.nn.sigmoid(decoder)
+
+# Building a manifold of generated digits
+    n = 20
+    x_axis = np.linspace(-3, 3, n)
+    y_axis = np.linspace(-3, 3, n)
+
+    canvas = np.empty((28 * n, 28 * n))
+    for i, yi in enumerate(x_axis):
+        for j, xi in enumerate(y_axis):
+            z_mu = np.array([[xi, yi]] * batch_size)
+            x_mean = sess.run(decoder, feed_dict={noise_input: z_mu})
+            canvas[(n - i - 1) * 28:(n - i) * 28, j * 28:(j + 1) * 28] = \
+            x_mean[0].reshape(28, 28)
+
+    plt.figure(figsize=(8, 10))
+    Xi, Yi = np.meshgrid(x_axis, y_axis)
+    plt.imshow(canvas, origin="upper", cmap="gray")
+    plt.show()
