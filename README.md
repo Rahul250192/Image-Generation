@@ -4,9 +4,11 @@ Image Generation can be done in different ways. These are the simple examples ne
 Dataset : 
 MNIST Dataset
 
-AutoEnoder
+AutoEnoder - Image ---> Latent ----> reconstructed Image
 
-Variational Auto Encoder- (Working on it)
+Variational Auto Encoder- (Reviewing)
 1. Using Xavier Initialization.
 2. Brief theory source - http://kvfrans.com/variational-autoencoders-explained/
-------
+
+GAN (Generative Adversarial Networks ) - (Working)
+1. Using Xavier Initialization.
