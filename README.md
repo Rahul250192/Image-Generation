@@ -12,3 +12,5 @@ Variational Auto Encoder- (Reviewing)
 
 GAN (Generative Adversarial Networks ) - (Working)
 1. Using Xavier Initialization.
+
+----------------------------------------------------------
