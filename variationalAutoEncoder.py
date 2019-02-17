@@ -23,15 +23,35 @@ def glorot_init(shape):
 # Weights and Biases
 weights = {
     'encoder_h1': tf.Variable(glorot_init([image_dim, hidden_dim])),
-    'z_mean': tf.Variable(glorot_init([hidden_dim, latent_dim])),
-    'z_std': tf.Variable(glorot_init([hidden_dim, latent_dim])),
+    'mean': tf.Variable(glorot_init([hidden_dim, latent_dim])),
+    'std': tf.Variable(glorot_init([hidden_dim, latent_dim])),
     'decoder_h1': tf.Variable(glorot_init([latent_dim, hidden_dim])),
     'decoder_out': tf.Variable(glorot_init([hidden_dim, image_dim]))
 }
 biases = {
     'encoder_b1': tf.Variable(glorot_init([hidden_dim])),
-    'z_mean': tf.Variable(glorot_init([latent_dim])),
-    'z_std': tf.Variable(glorot_init([latent_dim])),
+    'mean': tf.Variable(glorot_init([latent_dim])),
+    'std': tf.Variable(glorot_init([latent_dim])),
     'decoder_b1': tf.Variable(glorot_init([hidden_dim])),
     'decoder_out': tf.Variable(glorot_init([image_dim]))
 }
+
+#### Building the Encoder ####
+input_image = tf.placeholder(tf.float32, shape=[None, image_dim])
+encoder = tf.matmul(input_image, weights['encoder_h1']) + biases['encoder_b1']
+encoder = tf.nn.tanh(encoder)
+mean = tf.matmul(encoder, weights['mean']) + biases['mean']
+std = tf.matmul(encoder, weights['std']) + biases['std']
+
+# Distribution
+dis = tf.random_normal(tf.shape(std), dtype=tf.float32, mean=0., stddev=1.0,
+                       name='epsilon')
+
+z = mean + tf.exp(std / 2) * dis
+
+#### Decoder####
+decoder = tf.matmul(z, weights['decoder_h1']) + biases['decoder_b1']
+decoder = tf.nn.tanh(decoder)
+decoder = tf.matmul(decoder, weights['decoder_out']) + biases['decoder_out']
+decoder = tf.nn.sigmoid(decoder)
+
